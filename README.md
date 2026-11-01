@@ -9,7 +9,6 @@
 [![LLM Support](https://img.shields.io/badge/LLM-Gemini%202.5%20Flash%20%2B%20Deterministic%20Mock-blueviolet.svg)]()
 [![Visual Contract](https://img.shields.io/badge/UI%20Contract-Frozen%20%26%20Preserved-emerald.svg)]()
 
-> **Author:** **Kartik Wagh** ([@kartikwagh21](https://github.com/kartikwagh21))  
 > **Live Web App:** [https://aicoverletterpersonalizationtool-cl.vercel.app/](https://aicoverletterpersonalizationtool-cl.vercel.app/)  
 > **Backend Service:** [https://ai-cover-letter-personalization-tool.onrender.com/](https://ai-cover-letter-personalization-tool.onrender.com/)  
 > **Category:** Professional Productivity  
