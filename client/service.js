@@ -313,9 +313,25 @@ document.addEventListener('DOMContentLoaded', () => {
             setStepStatus(3, 'completed');
             setStepStatus(4, 'completed');
 
+            if (!response.ok) {
+                const errorText = await response.text();
+                let errMsg = `Server error (${response.status})`;
+                try {
+                    const parsed = JSON.parse(errorText);
+                    errMsg = parsed.error || errMsg;
+                } catch {
+                    if (errorText.includes('The page could not be found') || response.status === 404) {
+                        errMsg = 'Backend connection not found. Please hard refresh the page (Cmd+Shift+R) to load the latest backend configuration.';
+                    } else {
+                        errMsg = errorText.slice(0, 120);
+                    }
+                }
+                throw new Error(errMsg);
+            }
+
             const data = await response.json();
 
-            if (!response.ok || !data.success) {
+            if (!data.success) {
                 throw new Error(data.error || 'Server error occurred during generation.');
             }
 
