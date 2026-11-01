@@ -75,8 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentRunId = null;
     let extractedProfileCache = null;
 
-    const isLocalStatic = window.location.port === '8080' || window.location.port === '8000' || window.location.protocol === 'file:';
-    const API_BASE = isLocalStatic ? 'http://localhost:5001' : '';
+    const isLocalStatic = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+    const DEFAULT_RENDER_BACKEND = 'https://ai-cover-letter-personalization-tool.onrender.com';
+    const API_BASE = isLocalStatic ? 'http://localhost:5001' : (localStorage.getItem('backend_api_url') || DEFAULT_RENDER_BACKEND);
 
     // 1. Fetch Health & Provider Status
     async function checkHealth() {

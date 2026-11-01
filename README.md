@@ -2,12 +2,16 @@
 
 [![Node.js Version](https://img.shields.io/badge/Node.js-v18%2B%20%7C%20v20%2B%20%7C%20v24-green.svg)](https://nodejs.org/)
 [![Author](https://img.shields.io/badge/Author-Kartik%20Wagh-blue.svg)](https://github.com/kartikwagh21)
+[![Live Demo (Vercel)](https://img.shields.io/badge/Live%20Demo-Vercel-black.svg?logo=vercel)](https://aicoverletterpersonalizationtool-cl.vercel.app/)
+[![Backend API (Render)](https://img.shields.io/badge/Backend%20API-Render-46E3B7.svg?logo=render)](https://ai-cover-letter-personalization-tool.onrender.com/)
 [![Test Suite](https://img.shields.io/badge/Vitest-11%20Passed%20(100%25)-brightgreen.svg)]()
 [![Benchmark Cases](https://img.shields.io/badge/Benchmark%20Cases-5%20Passed-blue.svg)]()
 [![LLM Support](https://img.shields.io/badge/LLM-Gemini%202.5%20Flash%20%2B%20Deterministic%20Mock-blueviolet.svg)]()
 [![Visual Contract](https://img.shields.io/badge/UI%20Contract-Frozen%20%26%20Preserved-emerald.svg)]()
 
 > **Author:** **Kartik Wagh** ([@kartikwagh21](https://github.com/kartikwagh21))  
+> **Live Web App:** [https://aicoverletterpersonalizationtool-cl.vercel.app/](https://aicoverletterpersonalizationtool-cl.vercel.app/)  
+> **Backend Service:** [https://ai-cover-letter-personalization-tool.onrender.com/](https://ai-cover-letter-personalization-tool.onrender.com/)  
 > **Category:** Professional Productivity  
 > **Project Topic:** AI Cover Letter Personalization Tool  
 > **Practical Task:** Create a cover letter from **VERIFIED** candidate information and job requirements.  
