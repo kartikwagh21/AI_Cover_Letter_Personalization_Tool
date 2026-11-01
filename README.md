@@ -1,11 +1,13 @@
 # 🤖 AI Cover Letter Personalization Tool
 
 [![Node.js Version](https://img.shields.io/badge/Node.js-v18%2B%20%7C%20v20%2B%20%7C%20v24-green.svg)](https://nodejs.org/)
+[![Author](https://img.shields.io/badge/Author-Kartik%20Wagh-blue.svg)](https://github.com/kartikwagh21)
 [![Test Suite](https://img.shields.io/badge/Vitest-11%20Passed%20(100%25)-brightgreen.svg)]()
 [![Benchmark Cases](https://img.shields.io/badge/Benchmark%20Cases-5%20Passed-blue.svg)]()
 [![LLM Support](https://img.shields.io/badge/LLM-Gemini%202.5%20Flash%20%2B%20Deterministic%20Mock-blueviolet.svg)]()
 [![Visual Contract](https://img.shields.io/badge/UI%20Contract-Frozen%20%26%20Preserved-emerald.svg)]()
 
+> **Author:** **Kartik Wagh** ([@kartikwagh21](https://github.com/kartikwagh21))  
 > **Category:** Professional Productivity  
 > **Project Topic:** AI Cover Letter Personalization Tool  
 > **Practical Task:** Create a cover letter from **VERIFIED** candidate information and job requirements.  
@@ -328,6 +330,13 @@ This table maps every requirement of the project brief and evaluation criteria t
 
 ---
 
-## 🤝 14. Acknowledgements & Credits
+## 👨‍💻 14. Author & Acknowledgements
 
-This project builds upon the open-source frontend and backend architecture originally drafted by [Priyanshu Roushan](https://github.com/PR-Internship/AI-Cover-Letter-Generator). It transforms the prototype into an enterprise-grade, deterministic, and verifiable production system while honoring its visual design identity.
+### Author & Maintainer
+- **Name:** **Kartik Wagh**
+- **GitHub:** [@kartikwagh21](https://github.com/kartikwagh21)
+- **Repository:** [kartikwagh21/AI_Cover_Letter_Personalization_Tool](https://github.com/kartikwagh21/AI_Cover_Letter_Personalization_Tool)
+- **Role:** Full-Stack & AI Prompt Engineer
+
+### Credits & Acknowledgements
+Developed by **Kartik Wagh** for the AI Cover Letter Personalization Tool project. Built upon the initial design prototype by [Priyanshu Roushan](https://github.com/PR-Internship/AI-Cover-Letter-Generator) and transformed into a full-scale, deterministic 4-stage pipeline with verification gates, reference-based fact-checking, dark/light theme support, and multi-format automation exports.
