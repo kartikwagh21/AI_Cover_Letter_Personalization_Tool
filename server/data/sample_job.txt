@@ -1,0 +1,31 @@
+Role: Senior Full-Stack Engineer
+Company: Stripe
+Location: Seattle, WA (Hybrid)
+
+About the Role:
+At Stripe, we are building economic infrastructure for the internet. We are looking for an experienced Senior Full-Stack Engineer to join our Developer Platform group. In this role, you will design scalable web applications, engineer resilient APIs, and partner with product managers to deliver seamless developer experiences.
+
+Key Responsibilities:
+- Design, build, and maintain high-volume backend microservices using Node.js and modern relational databases (PostgreSQL).
+- Architect clean, accessible, and performant user interfaces using React and TypeScript.
+- Lead architectural reviews, mentor engineers, and maintain high engineering standards with automated CI/CD and testing.
+- Partner with cross-functional teams to translate customer needs into robust technical requirements.
+
+Required Qualifications (Must-Have):
+- 3+ years of professional full-stack software development experience.
+- Strong proficiency in modern JavaScript, TypeScript, Node.js, and React.
+- Solid experience designing schemas and optimizing queries in relational databases (PostgreSQL or MySQL).
+- Proven track record building and consuming RESTful APIs and distributed web services.
+- Experience with Git version control and collaborative code review practices.
+
+Preferred Qualifications (Nice-to-Have):
+- Experience with containerization technologies including Docker and Kubernetes.
+- Experience with AWS or Google Cloud Platform cloud environments.
+- Familiarity with Kafka or distributed message queues.
+- Demonstrated passion for developer tooling, test automation, and code readability.
+
+Company Values:
+- Users first
+- Move with urgency and focus
+- Rigorous thinking and high craftsmanship
+

@@ -2,6 +2,14 @@
 .env
 server/.env
 
+# Local Databases & Runtime WAL Files
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
+*.db
+*.db-shm
+*.db-wal
+
 # Dependencies
 node_modules/
 server/node_modules/

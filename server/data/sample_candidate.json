@@ -1,0 +1,68 @@
+{
+  "name": "Kartik Wagh",
+  "contact": {
+    "email": "kartik.wagh@example.com",
+    "phone": "+91 98765 43210",
+    "location": "Pune, India",
+    "linkedin": "https://linkedin.com/in/kartikwagh-dev"
+  },
+  "summary": "Full-Stack Engineer with 4+ years of experience building scalable web applications using React, Node.js and PostgreSQL. Proven record of improving API performance and raising user engagement in high-traffic products.",
+  "skills": [
+    "JavaScript",
+    "TypeScript",
+    "React",
+    "Node.js",
+    "PostgreSQL",
+    "MongoDB",
+    "Docker",
+    "Git",
+    "REST APIs",
+    "AWS",
+    "Redis",
+    "Jest"
+  ],
+  "experience": [
+    {
+      "company": "BrightPath Technologies",
+      "title": "Software Engineer II",
+      "period": "2022 - Present",
+      "responsibilities": [
+        "Built Node.js microservices handling 1M+ requests daily with 99.9% uptime",
+        "Redesigned the customer onboarding flow in React, improving completion rates by 20%",
+        "Optimized PostgreSQL queries and indexing, cutting average API response time by 35%"
+      ]
+    },
+    {
+      "company": "Nexora Software",
+      "title": "Junior Developer",
+      "period": "2020 - 2022",
+      "responsibilities": [
+        "Developed reusable React components used across internal dashboard applications",
+        "Wrote unit and integration tests in Jest, reaching 85% code coverage"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Savitribai Phule Pune University",
+      "degree": "B.E. in Computer Engineering",
+      "year": "2020"
+    }
+  ],
+  "certifications": [
+    "AWS Certified Developer – Associate",
+    "Docker Certified Associate"
+  ],
+  "projects": [
+    {
+      "name": "High-Traffic Microservices Platform",
+      "description": "Scalable Node.js microservices with Redis caching and PostgreSQL indexing handling 1M+ daily transactions",
+      "technologies": ["Node.js", "React", "PostgreSQL", "Redis", "Docker"]
+    }
+  ],
+  "achievements": [
+    "Optimized PostgreSQL queries and indexing, cutting average API response time by 35%",
+    "Redesigned customer onboarding workflow in React, improving completion rates by 20%",
+    "Built Node.js microservices handling 1M+ requests daily with 99.9% uptime"
+  ]
+}

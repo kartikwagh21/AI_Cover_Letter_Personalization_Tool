@@ -1,7 +1,8 @@
 const multer = require('multer');
 
 const errorHandler = (err, req, res, next) => {
-  console.error('Error occurred in request:', err);
+  const errMsg = err ? (err.message || String(err)) : 'Unknown error';
+  console.error('[Error Handler]', errMsg);
 
   // Handle Multer-specific errors
   if (err instanceof multer.MulterError) {

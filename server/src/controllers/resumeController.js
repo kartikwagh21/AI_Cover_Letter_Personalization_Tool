@@ -1,9 +1,10 @@
-const pdfService = require('../services/pdfService');
-const geminiService = require('../services/geminiService');
+const { runPipeline } = require('../pipeline/pipeline');
+const { executeAutomationWorkflow } = require('../automation/automation');
+const { getLLMStatus } = require('../llm/llmClient');
 
 async function analyzeResume(req, res, next) {
   try {
-    const { name, role, company, skills } = req.body;
+    const { name, role, company, skills, jobDescription } = req.body;
 
     if (!name || !name.trim()) {
       throw new Error('Candidate name is required.');
@@ -17,27 +18,42 @@ async function analyzeResume(req, res, next) {
     if (!skills || !skills.trim()) {
       throw new Error('Key skills are required.');
     }
-    let resumeText = '';
-    if (req.file) {
-      console.log(`[Controller] Resume file uploaded: ${req.file.originalname}`);
-      resumeText = await pdfService.extractTextFromPDF(req.file.buffer);
-    } else {
-      console.log('[Controller] No resume file uploaded, generating using form details only');
-    }
 
-    const coverLetter = await geminiService.generateCoverLetter({
-      name: name.trim(),
+    const fileBuffer = req.file ? req.file.buffer : null;
+    const llmStatus = getLLMStatus();
+
+    // Execute 4-stage pipeline
+    const pipelineResult = await runPipeline({
+      fileBuffer,
+      formFields: {
+        name: name.trim(),
+        role: role.trim(),
+        company: company.trim(),
+        skills: skills.trim()
+      },
+      jobDescription: jobDescription || '',
       role: role.trim(),
       company: company.trim(),
-      skills: skills.trim(),
-      resumeText
+      promptVersion: 'v3'
     });
 
-    console.log(`[Controller] Cover letter successfully generated for ${name}`);
+    // Execute automation workflow
+    const automationResult = await executeAutomationWorkflow({
+      pipelineResult,
+      jobDescription: jobDescription || '',
+      modelProvider: llmStatus.provider
+    });
 
     return res.status(200).json({
       success: true,
-      coverLetter
+      coverLetter: pipelineResult.letterOutput.letter,
+      factsUsed: pipelineResult.letterOutput.facts_used,
+      requirementsAddressed: pipelineResult.letterOutput.requirements_addressed,
+      gapsAcknowledged: pipelineResult.letterOutput.gaps_acknowledged,
+      jobAnalysis: pipelineResult.jobAnalysis,
+      evaluation: pipelineResult.evaluation,
+      receipt: automationResult.receipt,
+      runId: automationResult.run_id
     });
   } catch (error) {
     next(error);

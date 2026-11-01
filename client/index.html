@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume Analyzer</title>
+    <title>AI Cover Letter Personalization Tool</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,21 +16,42 @@
     <div class="bg-glow bg-glow-2"></div>
 
     <div class="container">
-        <h1>AI-Powered Cover Letter Generator</h1>
+        <header class="app-header">
+            <h1>AI-Powered Cover Letter Generator</h1>
+            <div class="header-meta">
+                <span class="badge" id="llm-badge">LLM: Initializing...</span>
+                <button type="button" class="header-link-btn" id="theme-toggle-btn" title="Toggle Light/Dark Theme">
+                    <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" hidden>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span id="theme-btn-text">Dark</span>
+                </button>
+                <button type="button" class="header-link-btn" id="open-history-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    History
+                </button>
+            </div>
+        </header>
 
         <div class="split-layout">
+            <!-- Left Card: Profile & Job Inputs -->
             <div class="card form-panel">
                 <h2>Analyze Your Profile</h2>
                 <form id="resume-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="name">Candidate Name</label>
-                            <input type="text" id="name" name="name" placeholder="John Doe" required autocomplete="name">
+                            <input type="text" id="name" name="name" placeholder="Kartik Wagh" required autocomplete="name">
                         </div>
 
                         <div class="form-group">
                             <label for="role">Job Role</label>
-                            <input type="text" id="role" name="role" placeholder="Frontend Engineer" required>
+                            <input type="text" id="role" name="role" placeholder="Full-Stack Engineer" required>
                         </div>
                     </div>
 
@@ -41,7 +62,7 @@
 
                     <div class="form-group">
                         <label for="skills">Key Skills</label>
-                        <textarea id="skills" name="skills" rows="4" placeholder="e.g. JavaScript, Node.js, React, CSS Grid..." required></textarea>
+                        <textarea id="skills" name="skills" rows="3" placeholder="e.g. JavaScript, TypeScript, React, Node.js, PostgreSQL..." required></textarea>
                     </div>
 
                     <div class="form-group">
@@ -64,14 +85,63 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="submit-button">
+                    <!-- Tone and Length Options -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tone">Tone</label>
+                            <select id="tone" name="tone">
+                                <option value="Formal" selected>Formal</option>
+                                <option value="Confident">Confident</option>
+                                <option value="Friendly-professional">Friendly-professional</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="length">Length</label>
+                            <select id="length" name="length">
+                                <option value="short">Short (150-250 words)</option>
+                                <option value="medium" selected>Medium (250-350 words)</option>
+                                <option value="long">Long (350-500 words)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Options Disclosure -->
+                    <details class="advanced-disclosure">
+                        <summary>Advanced Options</summary>
+                        <div class="disclosure-content">
+                            <div class="form-group">
+                                <label for="prompt-version">Prompt Version</label>
+                                <select id="prompt-version" name="prompt-version">
+                                    <option value="v3" selected>v3 Refined (Anti-Hallucination & Gap Grounding)</option>
+                                    <option value="v2">v2 Structured (Role & Markdown)</option>
+                                    <option value="v1">v1 Basic (Naive One-Liner)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
+
+                    <!-- Verification Step -->
+                    <div class="verification-card" id="verification-card">
+                        <div class="verification-header">
+                            <span class="verification-title">Verify Your Data</span>
+                        </div>
+                        <label class="confirm-checkbox-label" for="confirm-verification">
+                            <input type="checkbox" id="confirm-verification" required>
+                            <span>I confirm this information is accurate</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" id="submit-button" disabled>
                         <span class="btn-text">Generate Cover Letter</span>
                         <span class="btn-spinner" hidden></span>
                     </button>
                 </form>
             </div>
 
+            <!-- Right Card: Output Panel -->
             <div class="card result-panel">
+                <!-- Idle Placeholder State -->
                 <div id="idle-state" class="panel-state-placeholder">
                     <svg class="placeholder-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -80,15 +150,204 @@
                     <p>Enter your profile details and click generate. Your tailored AI cover letter will appear here.</p>
                 </div>
 
-                <div id="result" class="panel-state-result" hidden>
-                    <div id="output" class="output-content"></div>
-                    <button id="copy-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="copy-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="20" height="20">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                        </svg>
-                        <span id="copy-btn-text">Copy to Clipboard</span>
-                    </button>
+                <!-- 4-Stage Progress State during Generation -->
+                <div id="loading-state" class="panel-state-loading" hidden>
+                    <div class="spinner"></div>
+                    <div class="stage-progress">
+                        <div class="stage-step" id="step-1">
+                            <div class="stage-dot"></div>
+                            <span>1. Intake & Verification</span>
+                        </div>
+                        <div class="stage-step" id="step-2">
+                            <div class="stage-dot"></div>
+                            <span>2. Job Analysis & Matching</span>
+                        </div>
+                        <div class="stage-step" id="step-3">
+                            <div class="stage-dot"></div>
+                            <span>3. Cover Letter Generation</span>
+                        </div>
+                        <div class="stage-step" id="step-4">
+                            <div class="stage-dot"></div>
+                            <span>4. Evaluation & Fact-Check</span>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Result State with Tabs -->
+                <div id="result" class="panel-state-result" hidden>
+                    <!-- Compact Navigation Tabs -->
+                    <div class="tab-bar">
+                        <button type="button" class="tab-btn active" data-tab="tab-letter">Letter</button>
+                        <button type="button" class="tab-btn" data-tab="tab-match">Match Analysis</button>
+                        <button type="button" class="tab-btn" data-tab="tab-eval">Evaluation</button>
+                        <button type="button" class="tab-btn" data-tab="tab-receipt">Automation Receipt</button>
+                    </div>
+
+                    <!-- Tab 1: Letter -->
+                    <div class="tab-pane active" id="tab-letter">
+                        <textarea id="letter-editor" class="letter-textarea-editor" placeholder="Your cover letter will appear here..."></textarea>
+                        
+                        <div class="letter-actions">
+                            <button type="button" class="btn-action" id="copy-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                                <span id="copy-btn-text">Copy to Clipboard</span>
+                            </button>
+                            <button type="button" class="btn-action" id="download-docx-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                <span>Download DOCX</span>
+                            </button>
+                            <button type="button" class="btn-action" id="download-txt-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                <span>Download TXT</span>
+                            </button>
+                        </div>
+
+                        <!-- Traceability / Facts Used Strip -->
+                        <div class="facts-strip" id="facts-strip">
+                            <div class="facts-strip-title">Verified Facts Cited in Letter:</div>
+                            <ul class="facts-list" id="facts-list"></ul>
+                        </div>
+
+                        <div class="disclaimer-note">AI-generated cover letter based on verified candidate facts. Please review before sending.</div>
+                    </div>
+
+                    <!-- Tab 2: Match Analysis -->
+                    <div class="tab-pane" id="tab-match">
+                        <div class="match-card">
+                            <div>
+                                <label>Requirement Match Rate</label>
+                                <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
+                                    <span id="match-rate-text" style="font-size: 1.3rem; font-weight: 800; color: var(--accent-color);">100%</span>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);">(Calculated deterministically by code)</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label>Matched Skills</label>
+                                <div class="tags-cluster" id="matched-skills-tags"></div>
+                            </div>
+
+                            <div>
+                                <label>Gaps Acknowledged Honestly</label>
+                                <div class="tags-cluster" id="gaps-tags"></div>
+                            </div>
+
+                            <div>
+                                <label>Target Seniority & Company Values</label>
+                                <div id="seniority-values-text" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Evaluation -->
+                    <div class="tab-pane" id="tab-eval">
+                        <div class="eval-card">
+                            <div class="eval-header-row">
+                                <div>
+                                    <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-secondary);">Overall Score</span>
+                                    <div class="overall-score-badge" id="eval-overall-score">4.5 / 5.0</div>
+                                </div>
+                                <div id="eval-pass-badge" class="pass-pill">PASS</div>
+                            </div>
+
+                            <div id="claims-warning" class="claims-warning-box" hidden>
+                                <strong>Unsupported Claims Detected:</strong>
+                                <ul id="unsupported-claims-list" style="margin-left: 18px; margin-top: 4px;"></ul>
+                            </div>
+
+                            <table class="rubric-table">
+                                <thead>
+                                    <tr>
+                                        <th>Evaluation Dimension</th>
+                                        <th>Weight</th>
+                                        <th>Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Factual Accuracy (Fact Check)</td>
+                                        <td>30%</td>
+                                        <td class="score-col" id="score-accuracy">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Requirement Coverage</td>
+                                        <td>25%</td>
+                                        <td class="score-col" id="score-coverage">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Personalization & Specificity</td>
+                                        <td>15%</td>
+                                        <td class="score-col" id="score-personalization">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tone & Professionalism</td>
+                                        <td>15%</td>
+                                        <td class="score-col" id="score-tone">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Structure, Length & Grammar</td>
+                                        <td>15%</td>
+                                        <td class="score-col" id="score-structure">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="eval-legend">
+                                <strong>Grading Architecture:</strong> Requirement coverage, length, and structure are computed deterministically by code. Factual accuracy is forensic reference-checked against verified profile. Tone and professionalism are LLM-judged.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Automation Receipt -->
+                    <div class="tab-pane" id="tab-receipt">
+                        <div class="receipt-card">
+                            <div>
+                                <label>Automation Execution Summary</label>
+                                <div id="receipt-summary-text" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;"></div>
+                            </div>
+
+                            <div id="receipt-actions-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal-overlay" id="history-modal" hidden>
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Application Run History</h3>
+                <button type="button" class="modal-close-btn" id="close-history-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="runs-table">
+                    <thead>
+                        <tr>
+                            <th>Run ID</th>
+                            <th>Date</th>
+                            <th>Candidate</th>
+                            <th>Role & Company</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="runs-table-body">
+                        <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading past runs...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-action" id="export-csv-btn">Export CSV</button>
+                <button type="button" class="btn-action" id="export-xlsx-btn">Export XLSX</button>
             </div>
         </div>
     </div>

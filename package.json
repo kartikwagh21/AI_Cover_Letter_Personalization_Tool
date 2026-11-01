@@ -1,0 +1,22 @@
+{
+  "name": "ai-cover-letter-generator",
+  "version": "1.0.0",
+  "description": "AI Cover Letter Personalization Tool",
+  "private": true,
+  "scripts": {
+    "start": "cd server && npm start",
+    "build": "cd server && npm install",
+    "test": "cd server && npm test",
+    "test:cases": "cd server && npm run test:cases"
+  },
+  "keywords": [
+    "ai",
+    "cover-letter",
+    "gemini",
+    "express",
+    "react"
+  ],
+  "author": "Kartik Wagh",
+  "license": "ISC"
+}
+
