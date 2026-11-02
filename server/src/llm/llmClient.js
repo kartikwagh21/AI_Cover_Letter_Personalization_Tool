@@ -30,6 +30,107 @@ function getLLMStatus() {
 }
 
 /**
+ * Parses candidate profile dynamically from raw resume text when running in mock / fallback mode.
+ */
+function parseProfileFromText(rawText) {
+  let text = rawText || '';
+  const resumeMatch = text.match(/Resume Text:\s*\"\"\"([\s\S]*?)\"\"\"/i);
+  if (resumeMatch && resumeMatch[1]) {
+    text = resumeMatch[1].trim();
+  }
+
+  // Name extraction: first non-empty line without special markers or headers
+  let name = '';
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !/^sample\s*resume/i.test(l) && !/^curriculum\s*vitae/i.test(l) && !/^resume/i.test(l));
+  if (lines.length > 0) {
+    const candidateNameLine = lines[0];
+    if (candidateNameLine.length < 50 && !candidateNameLine.includes('@') && !candidateNameLine.includes('http') && !/^(skills|experience|education|summary)/i.test(candidateNameLine)) {
+      name = candidateNameLine.replace(/[•|].*$/, '').trim();
+    }
+  }
+
+  // Email
+  const emailMatch = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+  const email = emailMatch ? emailMatch[1] : '';
+
+  // Phone
+  const phoneMatch = text.match(/(\+?\d[\d\s\-()]{8,}\d)/);
+  const phone = phoneMatch ? phoneMatch[1].trim() : '';
+
+  // Location
+  let location = '';
+  const locMatch = text.match(/([A-Z][a-zA-Z\s]{1,30},\s*[A-Z][a-zA-Z\s]{1,30})/);
+  if (locMatch) location = locMatch[1].split('\n').pop().trim();
+
+  // LinkedIn
+  let linkedin = '';
+  const liMatch = text.match(/((?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+)/i);
+  if (liMatch) linkedin = liMatch[1].startsWith('http') ? liMatch[1] : 'https://' + liMatch[1];
+
+  // Role
+  let role = '';
+  const roleMatch = text.match(/(?:Job\s*role\s*interested\s*in|Target\s*Role|Role):\s*([^\n\r]+)/i);
+  if (roleMatch) role = roleMatch[1].trim();
+
+  // Summary
+  let summary = '';
+  const sumMatch = text.match(/(?:Professional\s*Summary|Summary|About\s*Me)\s*\n+([\s\S]*?)(?=\n+(?:Key\s*Skills|Skills|Experience|Professional\s*Experience|$))/i);
+  if (sumMatch) summary = sumMatch[1].replace(/\n+/g, ' ').trim();
+
+  // Skills
+  let skills = [];
+  const skillsMatch = text.match(/(?:Key\s*Skills|Skills|Technical\s*Skills)\s*\n+([\s\S]*?)(?=\n+(?:Professional\s*Experience|Experience|Education|Projects|Certifications|$))/i);
+  if (skillsMatch) {
+    skills = skillsMatch[1]
+      .split(/[,•\n\r]+/)
+      .map(s => s.trim().replace(/^[-*•]\s*/, ''))
+      .filter(s => s.length > 1 && !/^(skills|technical|key)$/i.test(s));
+  }
+
+  // Experience
+  const experience = [];
+  const expBlockMatch = text.match(/(?:Professional\s*Experience|Experience)\s*\n+([\s\S]*?)(?=\n+(?:Education|Certifications|Projects|$))/i);
+  if (expBlockMatch) {
+    const expText = expBlockMatch[1];
+    const expChunks = expText.split(/(?=\n[A-Z][A-Za-z0-9\s–—\-]+(?:—|-|\||\bat\b))/g);
+    for (const chunk of expChunks) {
+      const cleanChunk = chunk.trim();
+      if (!cleanChunk) continue;
+      const cLines = cleanChunk.split('\n').map(l => l.trim()).filter(Boolean);
+      if (cLines.length === 0) continue;
+      const titleLine = cLines[0];
+      const matchHeader = titleLine.match(/^([A-Za-z0-9\s]+?)\s*(?:—|-|\||\bat\b)\s*([A-Za-z0-9\s]+?)(?:\s*\((.*?)\)|\s*(\d{4}.*))?$/);
+      const title = matchHeader ? matchHeader[1].trim() : titleLine;
+      const company = matchHeader && matchHeader[2] ? matchHeader[2].trim() : '';
+      const period = matchHeader && (matchHeader[3] || matchHeader[4]) ? (matchHeader[3] || matchHeader[4]).trim() : '';
+      const responsibilities = cLines.slice(1).map(l => l.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
+      experience.push({ company, title, period, responsibilities });
+    }
+  }
+
+  // Education
+  const education = [];
+  const eduBlockMatch = text.match(/(?:Education\s*(?:&|and)?\s*Certifications|Education)\s*\n+([\s\S]*?)(?=\n+(?:Projects|$)|$)/i);
+  if (eduBlockMatch) {
+    const eduText = eduBlockMatch[1];
+    const eduLines = eduText.split('\n').map(l => l.trim()).filter(Boolean);
+    for (const line of eduLines) {
+      if (/certificate|associate|certified/i.test(line)) continue;
+      const eduMatch = line.match(/^([A-Za-z0-9.\s]+?)\s*(?:—|-|\||\bat\b)\s*([A-Za-z0-9\s]+?)(?:\s*\((.*?)\)|\s*(\d{4}.*))?$/);
+      if (eduMatch) {
+        education.push({
+          degree: eduMatch[1].trim(),
+          institution: eduMatch[2].trim(),
+          year: (eduMatch[3] || eduMatch[4] || '').trim()
+        });
+      }
+    }
+  }
+
+  return { name, contact: { email, phone, location, linkedin }, role, summary, skills, experience, education };
+}
+
+/**
  * Deterministic, version-aware mock generator for stages 1-4.
  */
 function mockLLMResponse({ stage, promptVersion = 'v3', userPrompt = '', context = {} }) {
@@ -40,20 +141,22 @@ function mockLLMResponse({ stage, promptVersion = 'v3', userPrompt = '', context
   const company = job.company || context.company || 'Tech Innovations Inc.';
   const skills = (Array.isArray(candidate.skills) && candidate.skills.length > 0)
     ? candidate.skills
-    : (context.skills ? context.skills.split(',').map(s => s.trim()) : ['JavaScript', 'React', 'Node.js', 'PostgreSQL']);
+    : (context.skills ? (Array.isArray(context.skills) ? context.skills : context.skills.split(',').map(s => s.trim())) : ['JavaScript', 'React', 'Node.js', 'PostgreSQL']);
 
   if (stage === 'intake_extraction') {
-    return JSON.stringify({
-      name: name,
-      contact: {
-        email: candidate.email || 'kartik.wagh@example.com',
-        phone: candidate.phone || '+91 98765 43210',
-        location: candidate.location || 'Pune, India',
-        linkedin: candidate.linkedin || 'https://linkedin.com/in/kartikwagh-dev'
-      },
-      summary: candidate.summary || 'Full-Stack Engineer with 4+ years of experience building scalable web applications using React, Node.js and PostgreSQL.',
-      skills: Array.isArray(skills) ? skills : [skills],
-      experience: candidate.experience && candidate.experience.length > 0 ? candidate.experience : [
+    const extracted = parseProfileFromText(userPrompt);
+    const resolvedName = extracted.name || candidate.name || context.name || 'Kartik Wagh';
+    const resolvedSkills = (extracted.skills && extracted.skills.length > 0)
+      ? extracted.skills
+      : (Array.isArray(skills) && skills.length > 0 ? skills : ['JavaScript', 'React', 'Node.js', 'PostgreSQL']);
+    const resolvedSummary = extracted.summary || candidate.summary || `Dedicated professional with experience in ${resolvedSkills.slice(0, 3).join(', ')}.`;
+    const resolvedEmail = extracted.contact?.email || candidate.email || 'kartik.wagh@example.com';
+    const resolvedPhone = extracted.contact?.phone || candidate.phone || '+91 98765 43210';
+    const resolvedLocation = extracted.contact?.location || candidate.location || 'Pune, India';
+    const resolvedLinkedin = extracted.contact?.linkedin || candidate.linkedin || 'https://linkedin.com/in/kartikwagh-dev';
+    const resolvedExperience = (extracted.experience && extracted.experience.length > 0)
+      ? extracted.experience
+      : (candidate.experience && candidate.experience.length > 0 ? candidate.experience : [
         {
           company: 'BrightPath Technologies',
           title: 'Software Engineer II',
@@ -73,14 +176,30 @@ function mockLLMResponse({ stage, promptVersion = 'v3', userPrompt = '', context
             'Wrote unit and integration tests in Jest, reaching 85% code coverage'
           ]
         }
-      ],
-      education: candidate.education && candidate.education.length > 0 ? candidate.education : [
+      ]);
+    const resolvedEducation = (extracted.education && extracted.education.length > 0)
+      ? extracted.education
+      : (candidate.education && candidate.education.length > 0 ? candidate.education : [
         {
           institution: 'Savitribai Phule Pune University',
           degree: 'B.E. in Computer Engineering',
           year: '2020'
         }
-      ],
+      ]);
+
+    return JSON.stringify({
+      name: resolvedName,
+      contact: {
+        email: resolvedEmail,
+        phone: resolvedPhone,
+        location: resolvedLocation,
+        linkedin: resolvedLinkedin
+      },
+      summary: resolvedSummary,
+      skills: resolvedSkills,
+      role: extracted.role || '',
+      experience: resolvedExperience,
+      education: resolvedEducation,
       certifications: candidate.certifications || ['AWS Certified Developer – Associate', 'Docker Certified Associate'],
       projects: candidate.projects && candidate.projects.length > 0 ? candidate.projects : [
         {

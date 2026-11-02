@@ -33,6 +33,7 @@ const CandidateProfileSchema = z.object({
   contact: ContactSchema.default({}),
   summary: z.string().default(''),
   skills: z.array(z.string()).min(1, 'At least one skill is required'),
+  role: z.string().optional().default(''),
   experience: z.array(ExperienceSchema).default([]),
   education: z.array(EducationSchema).default([]),
   certifications: z.array(z.string()).default([]),

@@ -154,11 +154,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (data.profile) {
                     extractedProfileCache = data.profile;
-                    if (data.profile.name && (!nameInput.value || nameInput.value === 'John Doe' || nameInput.value === 'Kartik Wagh')) {
+                    if (data.profile.name) {
                         nameInput.value = data.profile.name;
                     }
-                    if (data.profile.skills && data.profile.skills.length > 0 && !skillsInput.value) {
+                    if (data.profile.skills && data.profile.skills.length > 0) {
                         skillsInput.value = data.profile.skills.join(', ');
+                    }
+                    if (data.profile.role && (!roleInput.value || roleInput.value === 'Full-Stack Engineer' || roleInput.value === 'Software Engineer')) {
+                        roleInput.value = data.profile.role;
                     }
                     if (data.profile.summary && verifiedSummaryInput) {
                         verifiedSummaryInput.value = data.profile.summary;
