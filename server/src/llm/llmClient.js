@@ -34,52 +34,88 @@ function getLLMStatus() {
  */
 function parseProfileFromText(rawText) {
   let text = rawText || '';
-  const resumeMatch = text.match(/Resume Text:\s*\"\"\"([\s\S]*?)\"\"\"/i);
-  if (resumeMatch && resumeMatch[1]) {
-    text = resumeMatch[1].trim();
+
+  // Extract form details if present
+  let formName = '';
+  const formNameMatch = text.match(/Candidate Name:\s*([^\n\r]+)/i);
+  if (formNameMatch && !/not specified/i.test(formNameMatch[1])) {
+    formName = formNameMatch[1].trim();
   }
 
-  // Name extraction: first non-empty line without special markers or headers
-  let name = '';
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0 && !/^sample\s*resume/i.test(l) && !/^curriculum\s*vitae/i.test(l) && !/^resume/i.test(l));
-  if (lines.length > 0) {
-    const candidateNameLine = lines[0];
-    if (candidateNameLine.length < 50 && !candidateNameLine.includes('@') && !candidateNameLine.includes('http') && !/^(skills|experience|education|summary)/i.test(candidateNameLine)) {
-      name = candidateNameLine.replace(/[•|].*$/, '').trim();
+  let formSkills = [];
+  const formSkillsMatch = text.match(/Key Skills:\s*([^\n\r]+)/i);
+  if (formSkillsMatch && !/not specified/i.test(formSkillsMatch[1])) {
+    formSkills = formSkillsMatch[1].split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  const resumeMatch = text.match(/Resume Text:\s*\"\"\"([\s\S]*?)\"\"\"/i);
+  let resumeText = '';
+  if (resumeMatch && resumeMatch[1]) {
+    resumeText = resumeMatch[1].trim();
+    if (/^no resume PDF provided/i.test(resumeText)) {
+      resumeText = '';
     }
   }
 
+  // Name extraction: first non-empty line from resume without special markers or headers
+  let name = '';
+  if (resumeText) {
+    const lines = resumeText.split('\n').map(l => l.trim()).filter(l =>
+      l.length > 0 &&
+      !/^sample\s*resume/i.test(l) &&
+      !/^curriculum\s*vitae/i.test(l) &&
+      !/^resume/i.test(l) &&
+      !/^no resume/i.test(l)
+    );
+    if (lines.length > 0) {
+      const candidateNameLine = lines[0];
+      if (candidateNameLine.length < 50 &&
+          !candidateNameLine.includes('@') &&
+          !candidateNameLine.includes('http') &&
+          !/^(skills|experience|education|summary|contact|phone|email)/i.test(candidateNameLine) &&
+          !/^(no resume|not specified)/i.test(candidateNameLine)) {
+        name = candidateNameLine.replace(/[•|].*$/, '').trim();
+      }
+    }
+  }
+
+  if (!name && formName) {
+    name = formName;
+  }
+
+  const parseTarget = resumeText || text;
+
   // Email
-  const emailMatch = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+  const emailMatch = parseTarget.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
   const email = emailMatch ? emailMatch[1] : '';
 
   // Phone
-  const phoneMatch = text.match(/(\+?\d[\d\s\-()]{8,}\d)/);
+  const phoneMatch = parseTarget.match(/(\+?\d[\d\s\-()]{8,}\d)/);
   const phone = phoneMatch ? phoneMatch[1].trim() : '';
 
   // Location
   let location = '';
-  const locMatch = text.match(/([A-Z][a-zA-Z\s]{1,30},\s*[A-Z][a-zA-Z\s]{1,30})/);
+  const locMatch = parseTarget.match(/([A-Z][a-zA-Z\s]{1,30},\s*[A-Z][a-zA-Z\s]{1,30})/);
   if (locMatch) location = locMatch[1].split('\n').pop().trim();
 
   // LinkedIn
   let linkedin = '';
-  const liMatch = text.match(/((?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+)/i);
+  const liMatch = parseTarget.match(/((?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[a-zA-Z0-9_-]+)/i);
   if (liMatch) linkedin = liMatch[1].startsWith('http') ? liMatch[1] : 'https://' + liMatch[1];
 
   // Role
   let role = '';
-  const roleMatch = text.match(/(?:Job\s*role\s*interested\s*in|Target\s*Role|Role):\s*([^\n\r]+)/i);
+  const roleMatch = parseTarget.match(/(?:Job\s*role\s*interested\s*in|Target\s*Role|Role):\s*([^\n\r]+)/i);
   if (roleMatch) role = roleMatch[1].trim();
 
   // Summary
   let summary = '';
-  const sumMatch = text.match(/(?:Professional\s*Summary|Summary|About\s*Me)\s*\n+([\s\S]*?)(?=\n+(?:Key\s*Skills|Skills|Experience|Professional\s*Experience|$))/i);
+  const sumMatch = parseTarget.match(/(?:Professional\s*Summary|Summary|About\s*Me)\s*\n+([\s\S]*?)(?=\n+(?:Key\s*Skills|Skills|Experience|Professional\s*Experience|$))/i);
   if (sumMatch) summary = sumMatch[1].replace(/\n+/g, ' ').trim();
 
   // Skills
   let skills = [];
-  const skillsMatch = text.match(/(?:Key\s*Skills|Skills|Technical\s*Skills)\s*\n+([\s\S]*?)(?=\n+(?:Professional\s*Experience|Experience|Education|Projects|Certifications|$))/i);
+  const skillsMatch = parseTarget.match(/(?:Key\s*Skills|Skills|Technical\s*Skills)\s*\n+([\s\S]*?)(?=\n+(?:Professional\s*Experience|Experience|Education|Projects|Certifications|$))/i);
   if (skillsMatch) {
     skills = skillsMatch[1]
       .split(/[,•\n\r]+/)
@@ -87,9 +123,13 @@ function parseProfileFromText(rawText) {
       .filter(s => s.length > 1 && !/^(skills|technical|key)$/i.test(s));
   }
 
+  if (skills.length === 0 && formSkills.length > 0) {
+    skills = formSkills;
+  }
+
   // Experience
   const experience = [];
-  const expBlockMatch = text.match(/(?:Professional\s*Experience|Experience)\s*\n+([\s\S]*?)(?=\n+(?:Education|Certifications|Projects|$))/i);
+  const expBlockMatch = parseTarget.match(/(?:Professional\s*Experience|Experience)\s*\n+([\s\S]*?)(?=\n+(?:Education|Certifications|Projects|$))/i);
   if (expBlockMatch) {
     const expText = expBlockMatch[1];
     const expChunks = expText.split(/(?=\n[A-Z][A-Za-z0-9\s–—\-]+(?:—|-|\||\bat\b))/g);
@@ -110,7 +150,7 @@ function parseProfileFromText(rawText) {
 
   // Education
   const education = [];
-  const eduBlockMatch = text.match(/(?:Education\s*(?:&|and)?\s*Certifications|Education)\s*\n+([\s\S]*?)(?=\n+(?:Projects|$)|$)/i);
+  const eduBlockMatch = parseTarget.match(/(?:Education\s*(?:&|and)?\s*Certifications|Education)\s*\n+([\s\S]*?)(?=\n+(?:Projects|$)|$)/i);
   if (eduBlockMatch) {
     const eduText = eduBlockMatch[1];
     const eduLines = eduText.split('\n').map(l => l.trim()).filter(Boolean);
