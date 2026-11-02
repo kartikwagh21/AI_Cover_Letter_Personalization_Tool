@@ -128,10 +128,14 @@ function mockLLMResponse({ stage, promptVersion = 'v3', userPrompt = '', context
     let letterBody = '';
     const factsUsed = [
       `Candidate Name: ${name}`,
-      `Verified skills: ${skills.slice(0, 4).join(', ')}`,
-      candidate.experience && candidate.experience[0] ? `Previous role: ${candidate.experience[0].title} at ${candidate.experience[0].company}` : 'Previous role: Software Engineer II at BrightPath Technologies',
-      candidate.education && candidate.education[0] ? `Degree: ${candidate.education[0].degree} from ${candidate.education[0].institution}` : 'Degree: B.E. in Computer Engineering from Savitribai Phule Pune University'
+      `Verified skills: ${skills.slice(0, 4).join(', ')}`
     ];
+    if (candidate.experience && candidate.experience.length > 0 && candidate.experience[0].company) {
+      factsUsed.push(`Previous role: ${candidate.experience[0].title} at ${candidate.experience[0].company}`);
+    }
+    if (candidate.education && candidate.education.length > 0 && candidate.education[0].institution) {
+      factsUsed.push(`Degree: ${candidate.education[0].degree} from ${candidate.education[0].institution}`);
+    }
 
     const requirementsAddressed = [
       `Proficiency in ${skills[0] || 'core engineering'}`,
